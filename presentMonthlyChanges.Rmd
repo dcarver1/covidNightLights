@@ -1,0 +1,257 @@
+---
+title: "monthlyComparisions of Night Lights Data"
+author: "dan carver"
+date: "10/1/2020"
+output: html_document
+---
+
+For Santa Rosa and Dhaka show the changes in night light values between Jan-Feb and Feb-Mar 2020 
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(raster)
+library(dplyr)
+library(sf)
+library(tmap)
+tmap_mode("view")
+
+# baseDir
+baseDir <- "F:/nrelD/geoSpatialCentroid/covidNightLights"
+
+crm <- function(r,template){
+  # r is a raster
+  # template is a raster 
+  # crs need to be the same 
+  r1 <- r %>%
+  raster::crop(template) %>%
+  raster::resample(y = template, method = "bilinear")%>%
+  raster::mask(template)
+  return(r1)
+}
+
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+# global settlement layers, these I huge I need to deal with them first. 
+pop <- raster::raster("F:/nrelD/genericSpatialData/world/globalHumanSettlement/GHS_POP_E2015_GLOBE_R2019A_54009_250_V1_0/GHS_POP_E2015_GLOBE_R2019A_54009_250_V1_0.tif")
+built <- raster::raster("F:/nrelD/genericSpatialData/world/globalHumanSettlement/GHS_BUILT_LDS2014_GLOBE_R2018A_54009_250_V2_0/GHS_BUILT_LDS2014_GLOBE_R2018A_54009_250_V2_0.tif")
+mCRS <- pop@crs
+
+### Extent layers 
+extents <- sf::read_sf("F:/nrelD/geoSpatialCentroid/covidNightLights/data/fromGEE/extentLocations.shp")
+sExtent <- extents[3,]%>%
+  sf::st_transform(crs = mCRS)
+dExtent <- extents[1,]%>%
+  sf::st_transform(crs = mCRS)
+
+# lat long 
+lCRS <-  crs("+proj=longlat +datum=WGS84 +no_defs")
+
+spop <- raster::crop(x = pop, y = sExtent) %>%
+  raster::projectRaster(crs = lCRS)
+dpop <- raster::crop(x = pop, y = dExtent)%>%
+  raster::projectRaster(crs = lCRS)
+rm(pop)
+
+sbuilt <- raster::crop(x = built, y = sExtent)%>%
+  raster::projectRaster(crs = lCRS)
+dbuilt <- raster::crop(x = built, y = dExtent)%>%
+  raster::projectRaster(crs = lCRS)
+rm(built)
+
+
+
+
+
+# read in layers 
+## santa rosa 
+sJ <-raster::raster("F:/nrelD/geoSpatialCentroid/covidNightLights/data/2020/janurary/santaRosa.tif")
+sF <-raster::raster("F:/nrelD/geoSpatialCentroid/covidNightLights/data/2020/feburary/santaRosa.tif")
+sM <-raster::raster("F:/nrelD/geoSpatialCentroid/covidNightLights/data/2020/march/santaRosa.tif")
+# dhaka 
+dJ <- raster::raster("F:/nrelD/geoSpatialCentroid/covidNightLights/data/2020/janurary/dhaka.tif")
+dF <- raster::raster("F:/nrelD/geoSpatialCentroid/covidNightLights/data/2020/feburary/dhaka.tif")
+dM <- raster::raster("F:/nrelD/geoSpatialCentroid/covidNightLights/data/2020/march/dhaka.tif")
+
+```
+
+<br>
+
+## Dhaka Bangladesh 
+
+The map is constructed around the general area of Dhaka Bangladesh 
+All radiance values that were < 1 for each month were replace with NA values. This can be change but was down to filter out low light areas
+
+
+**Note: The cell size of these images are much larger then when they are collected. These visualizations below are meant to indentify general areas of interest**
+
+<br>
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+### Drop all low level values
+dJ[dJ[] < 1 ,] <-NA 
+dF[dF[] < 1 ,] <-NA 
+dM[dM[] < 1 ,] <-NA 
+
+# jan - feb diff 
+djf <- dJ - dF
+
+# feb - mar diff
+dfm <- dF - dM
+
+### crop and resample world pop and build layers 
+dpopjf <- crm(r = dpop, template = djf)
+dpopfm <- crm(r = dpop, template = dfm)
+
+dbuiltjf <- crm(r = dbuilt, template = djf)
+dbuiltfm <- crm(r = dbuilt, template = dfm)
+
+
+### jan feb map 
+djfMap <- tm_shape(dbuiltjf, name = "build envir")+
+  tm_raster(title = "% Built Environment") +
+  tm_shape(dpopjf, name = "population")+
+  tm_raster(title = "total population")+
+  tm_shape(djf, name ="radiance")+
+  tm_raster(title = "jan - feb radience", n =10)
+  
+
+### feb mar map 
+dfmMap <- tm_shape(dbuiltfm, name = "build envir")+
+  tm_raster(title = "% Built Environment") +
+  tm_shape(dpopfm, name = "population")+
+  tm_raster(title = "total population")+
+  tm_shape(dfm,name = "radience")+
+  tm_raster(title = "feb - mar radience", n =10)
+  
+
+```
+<br>
+
+
+### Change in radience between Jan and Feb 2020
+
+<br>
+
+- Postive values indicate the Janurary was brighter
+
+- Negative values indicate that Feburary was brighter
+
+<br>
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+djfMap
+
+```
+<br>
+
+
+### Change in radience between Feb and March 2020
+
+<br>
+
+- Postive values indicate the Feburary was brighter
+
+- Negative values indicate that March was brighter
+
+<br>
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+dfmMap
+
+```
+<br>
+
+
+## Santa Rosa, United States of America
+
+<br>
+
+The map is constructed around the general area of Santa Rosa,CA, USA. 
+All radiance values that were < 1 for each month were replace with NA values. This can be change but was down to filter out low light areas
+
+
+**Note: The cell size of these images are much larger then when they are collected. These visualizations below are meant to indentify general areas of interest**
+
+<br>
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+### Drop all low level values
+sJ[sJ[] < 1 ,] <-NA 
+sF[sF[] < 1 ,] <-NA 
+sM[sM[] < 1 ,] <-NA 
+
+
+# jan - feb diff 
+sjf <- sJ - sF
+# feb - mar diff
+sfm <- sF - sM
+
+### crop and resample world pop and build layers 
+spopjf <- crm(r = spop, template = sjf)
+spopfm <- crm(r = spop, template = sfm)
+
+sbuiltjf <- crm(r = sbuilt, template = sjf)
+sbuiltfm <- crm(r = sbuilt, template = sfm)
+
+
+### jan feb map 
+sjfMap <- tm_shape(sbuiltjf, name = "build envir")+
+ tm_raster(title = "% Built Environment") +
+ tm_shape(spopjf, name = "population")+
+ tm_raster(title = "total population")+
+ tm_shape(sjf, name = "radience")+
+ tm_raster(title = "jan - feb radience", n = 10)
+ 
+### feb mar map 
+sfmMap <- tm_shape(sbuiltfm, name = "build envir")+
+ tm_raster(title = "% Built Environment") +
+ tm_shape(spopfm, name = "population")+
+ tm_raster(title = "total population")+
+ tm_shape(sfm, name = "radience")+
+ tm_raster(title = "feb - mar radience" , n =10)
+ 
+```
+<br>
+
+### Change in radience between Jan and Feb 2020
+
+<br>
+
+- Postive values indicate the Janurary was brighter
+
+- Negative values indicate that Feburary was brighter
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+sjfMap
+```
+<br>
+
+### Change in radience between Feb and March 2020
+
+<br>
+
+- Postive values indicate the Feburary was brighter
+
+- Negative values indicate that March was brighter
+
+
+Change the base map to open street map and you can see what under the areas of high change
+
+1. valero benicia refinery 
+
+2. San Fransico Airport
+
+3. alamenda county complex 
+
+<br>
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+sfmMap
+```
+
+
