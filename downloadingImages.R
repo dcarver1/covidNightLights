@@ -5,7 +5,7 @@
 ###
 
 # base directory 
-baseDir <- "F:/nrelD/geoSpatialCentroid/covidNightLights/data"
+baseDir <- "D:/nrelD/geoSpatialCentroid/covidNightLights/data"
 
 
 ### 
@@ -136,16 +136,16 @@ for(i in 1:length(f2018)){
   
   
 f2016 <- c(
-  "https://eogdata.mines.edu/wwwdata/viirs_products/dnb_composites/v10//201612/vcmcfg/SVDNB_npp_20161201-20161231_75N180W_vcmcfg_v10_c201701271136.tgz",
-  "https://eogdata.mines.edu/wwwdata/viirs_products/dnb_composites/v10//201611/vcmcfg/SVDNB_npp_20161101-20161130_75N180W_vcmcfg_v10_c201612191231.tgz",
-  "https://eogdata.mines.edu/wwwdata/viirs_products/dnb_composites/v10//201610/vcmcfg/SVDNB_npp_20161001-20161031_75N180W_vcmcfg_v10_c201612011122.tgz",
-  "https://eogdata.mines.edu/wwwdata/viirs_products/dnb_composites/v10//201609/vcmcfg/SVDNB_npp_20160901-20160930_75N180W_vcmcfg_v10_c201610280941.tgz",
-  "https://eogdata.mines.edu/wwwdata/viirs_products/dnb_composites/v10//201608/vcmcfg/SVDNB_npp_20160801-20160831_75N180W_vcmcfg_v10_c201610041107.tgz",
-  "https://eogdata.mines.edu/wwwdata/viirs_products/dnb_composites/v10//201607/vcmcfg/SVDNB_npp_20160701-20160731_75N180W_vcmcfg_v10_c201609121310.tgz",
-  "https://eogdata.mines.edu/wwwdata/viirs_products/dnb_composites/v10//201606/vcmcfg/SVDNB_npp_20160601-20160630_75N180W_vcmcfg_v10_c201608101832.tgz",
-  "https://eogdata.mines.edu/wwwdata/viirs_products/dnb_composites/v10//201605/vcmcfg/SVDNB_npp_20160501-20160531_75N180W_vcmcfg_v10_c201606281430.tgz",
-  "https://eogdata.mines.edu/wwwdata/viirs_products/dnb_composites/v10//201604/vcmcfg/SVDNB_npp_20160401-20160430_75N180W_vcmcfg_v10_c201606140957.tgz",
-  "https://eogdata.mines.edu/wwwdata/viirs_products/dnb_composites/v10//201603/vcmcfg/SVDNB_npp_20160301-20160331_75N180W_vcmcfg_v10_c201604191144.tgz",
+  # "https://eogdata.mines.edu/wwwdata/viirs_products/dnb_composites/v10//201612/vcmcfg/SVDNB_npp_20161201-20161231_75N180W_vcmcfg_v10_c201701271136.tgz",
+  # "https://eogdata.mines.edu/wwwdata/viirs_products/dnb_composites/v10//201611/vcmcfg/SVDNB_npp_20161101-20161130_75N180W_vcmcfg_v10_c201612191231.tgz",
+  # "https://eogdata.mines.edu/wwwdata/viirs_products/dnb_composites/v10//201610/vcmcfg/SVDNB_npp_20161001-20161031_75N180W_vcmcfg_v10_c201612011122.tgz",
+  # "https://eogdata.mines.edu/wwwdata/viirs_products/dnb_composites/v10//201609/vcmcfg/SVDNB_npp_20160901-20160930_75N180W_vcmcfg_v10_c201610280941.tgz",
+  # "https://eogdata.mines.edu/wwwdata/viirs_products/dnb_composites/v10//201608/vcmcfg/SVDNB_npp_20160801-20160831_75N180W_vcmcfg_v10_c201610041107.tgz",
+  # "https://eogdata.mines.edu/wwwdata/viirs_products/dnb_composites/v10//201607/vcmcfg/SVDNB_npp_20160701-20160731_75N180W_vcmcfg_v10_c201609121310.tgz",
+  # "https://eogdata.mines.edu/wwwdata/viirs_products/dnb_composites/v10//201606/vcmcfg/SVDNB_npp_20160601-20160630_75N180W_vcmcfg_v10_c201608101832.tgz",
+  # "https://eogdata.mines.edu/wwwdata/viirs_products/dnb_composites/v10//201605/vcmcfg/SVDNB_npp_20160501-20160531_75N180W_vcmcfg_v10_c201606281430.tgz",
+  # "https://eogdata.mines.edu/wwwdata/viirs_products/dnb_composites/v10//201604/vcmcfg/SVDNB_npp_20160401-20160430_75N180W_vcmcfg_v10_c201606140957.tgz",
+  # "https://eogdata.mines.edu/wwwdata/viirs_products/dnb_composites/v10//201603/vcmcfg/SVDNB_npp_20160301-20160331_75N180W_vcmcfg_v10_c201604191144.tgz",
   "https://eogdata.mines.edu/wwwdata/viirs_products/dnb_composites/v10//201602/vcmcfg/SVDNB_npp_20160201-20160229_75N180W_vcmcfg_v10_c201603152010.tgz",
   "https://eogdata.mines.edu/wwwdata/viirs_products/dnb_composites/v10//201601/vcmcfg/SVDNB_npp_20160101-20160131_75N180W_vcmcfg_v10_c201603132032.tgz"
 )
@@ -270,5 +270,5 @@ filenames = RCurl::getURL(url, ssl.verifypeer = FALSE, verbose=TRUE,ftp.use.epsv
 install.packages("XML")
 library(XML)
 files <- getHTMLLinks(filenames)
-write.csv(files, "F:/nrelD/geoSpatialCentroid/covidNightLights/data/filePaths/houstenCSVS.csv")
+write.csv(files, "D:/nrelD/geoSpatialCentroid/covidNightLights/data/filePaths/houstenCSVS.csv")
 
