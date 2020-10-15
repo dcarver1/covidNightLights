@@ -1,0 +1,18 @@
+---
+title: "category Splits for Source Habitat Descriptors"
+author: "dan carver"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+---
+
+
+
+library(raster)
+library(tmap)
+library(sp)
+library(rgeos)
+
+r1 <- raster::stack("F:/nrelD/geoSpatialCentroid/covidNightLights/data/fromGEE/robesonCounty.tif")
+r1
+qtm(r1[[20]])
+
