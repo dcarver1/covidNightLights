@@ -43,6 +43,10 @@ hsn <- cnt %>%
 
 # full list of all locations 
 locs <- rbind(hsn, robe)
+#reproject to wgs1984 
+cnt <- sf::st_transform(x = locs, crs = "+proj=longlat +datum=WGS84 +no_defs")
+
+
 
 # list of all months 
 m <- c("janurary", "feburary", "march", "april", "may", "june", "july", "august", "october",

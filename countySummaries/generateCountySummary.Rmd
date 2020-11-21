@@ -1,0 +1,271 @@
+---
+title: "renderCountySummaries"
+author: "dan carver"
+date: "11/13/2020"
+output: html_document
+---
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(raster)
+library(dplyr)
+library(sf)
+library(tmap)
+library(plotly)
+library(psych)
+library(DT)
+tmap_mode("view")
+
+nlcdPallette <- c("#486da2", "#f10100", "#b3afa4", "#1d6533",
+                  "#b0963f", "#d0d181", "#ae722a", "#bbd7ed")
+nlcdClasses <- c("water", "developed", "barren", "forest",
+                 "scrub", "grassland", "crops", "wetlands")
+```
+
+This script will be called to generate some statistical summaries and area visualizations for the various counties of interest
+
+Map showing the land cover data for the county. [data source](https://www.mrlc.gov/data/nlcd-2016-land-cover-conus)
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+vals <- unique(values(lc2))
+vals <- sort(vals[!is.na(vals)])
+nlcdPallette <- nlcdPallette[vals]
+nlcdClasses <- nlcdClasses[vals]
+m1 <- tm_shape(lc2) +
+    tm_raster(style = "cat", palette = nlcdPallette, labels = nlcdClasses, title = "Land Cover")+
+  tm_layout(legend.outside = TRUE)
+m1
+```
+<br><br>
+***
+<br>
+
+Map showing the estimated population across the county. Open areas are zero. [data source](https://ghsl.jrc.ec.europa.eu/ghs_pop2019.php)
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+pop2[pop2[] == 0] <- NA
+pop2[pop2[] == -0] <- NA
+
+m2 <- tm_shape(pop2) +
+    tm_raster(style = "kmeans", n = 5, palette = "YlGnBu", title = "Population")
+m2
+```
+<br>
+<br>
+
+# Various Distributions {.tabset .tabset-fade .tabset-pills}
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# call function to generate plots
+p1 <- values(rad)
+p1 <- p1[!is.na(p1)]
+b1 <- c(0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610)
+b1 <- append(b1[b1 < max(p1)], max(p1))
+```
+
+## All values
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#
+p2 <- p1
+
+fig <- plot_ly(x = p2,
+             type = "histogram") %>%
+layout(title = 'All Radience Values',
+         xaxis = list(title = 'Radience in nanowatts',
+                      zeroline = TRUE),
+         yaxis = list(title = 'Count of Pixels'))
+
+fig
+```
+Histogram shows number of pixels within each bin 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+d2 <-psych::describe(p2, IQR = TRUE)
+DT::datatable(d2)
+```
+<br><br>
+Summary statistics of the pixel values 
+<br><br> 
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# reset for min vals
+b1 <- sort(unique(append(b1[b1 >= min(p2)], min(p2))))
+tm_shape(rad) +
+  tm_raster(style = "fixed", breaks =b1, title = "radiance")
+
+```
+Map showing the distribution of the radiance values 
+
+## Values Greatern then 1
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#
+p2 <- p1[p1 >= 1]
+
+fig <- plot_ly(x = p2,
+             type = "histogram") %>%
+layout(title = 'All Radience Values',
+         xaxis = list(title = 'Radience in nanowatts',
+                      zeroline = TRUE),
+         yaxis = list(title = 'Count of Pixels'))
+
+fig
+```
+Histogram shows probabilities of feature within  
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+d2 <-psych::describe(p2, IQR = TRUE)
+DT::datatable(d2)
+```
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# reset for min vals
+b1 <- sort(unique(append(b1[b1 >= min(p2)], min(p2))))
+rad1 <- rad
+rad1[rad1[] < min(p2)] <- NA
+tm_shape(rad1) +
+  tm_raster(style = "fixed", breaks =b1, title = "radiance")
+
+```
+
+## Values Greatern then 2
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#
+p2 <- p1[p1 >= 2]
+
+fig <- plot_ly(x = p2,
+             type = "histogram") %>%
+layout(title = 'All Radience Values',
+         xaxis = list(title = 'Radience in nanowatts',
+                      zeroline = TRUE),
+         yaxis = list(title = 'Count of Pixels'))
+
+fig
+```
+Histogram shows probabilities of feature within  
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+d2 <-psych::describe(p2, IQR = TRUE)
+DT::datatable(d2)
+```
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# reset for min vals
+b1 <- sort(unique(append(b1[b1 >= min(p2)], min(p2))))
+rad1 <- rad
+rad1[rad1[] < min(p2)]<- NA
+tm_shape(rad1) +
+  tm_raster(style = "fixed", breaks =b1, title = "radiance")
+
+```
+
+## Values Greatern then 3
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#
+p2 <- p1[p1 >= 3]
+
+fig <- plot_ly(x = p2,
+             type = "histogram") %>%
+layout(title = 'All Radience Values',
+         xaxis = list(title = 'Radience in nanowatts',
+                      zeroline = TRUE),
+         yaxis = list(title = 'Count of Pixels'))
+
+fig
+```
+Histogram shows probabilities of feature within  
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+d2 <-psych::describe(p2, IQR = TRUE)
+DT::datatable(d2)
+```
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# reset for min vals
+b1 <- sort(unique(append(b1[b1 >= min(p2)], min(p2))))
+rad1 <- rad
+rad1[rad1[] < min(p2)]<- NA
+tm_shape(rad1) +
+  tm_raster(style = "fixed", breaks =b1, title = "radiance")
+
+```
+
+## Values Greatern then 4
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#
+p2 <- p1[p1 >= 4]
+
+fig <- plot_ly(x = p2,
+             type = "histogram") %>%
+layout(title = 'All Radience Values',
+         xaxis = list(title = 'Radience in nanowatts',
+                      zeroline = TRUE),
+         yaxis = list(title = 'Count of Pixels'))
+
+fig
+```
+Histogram shows probabilities of feature within  
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+d2 <-psych::describe(p2, IQR = TRUE)
+DT::datatable(d2)
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# reset for min vals
+b1 <- sort(unique(append(b1[b1 >= min(p2)], min(p2))))
+rad1 <- rad
+rad1[rad1[] < min(p2)]<- NA
+tm_shape(rad1) +
+  tm_raster(style = "fixed", breaks =b1, title = "radiance")
+
+```
+
+## Values Greatern then 5
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#
+p2 <- p1[p1 >= 5]
+
+fig <- plot_ly(x = p2,
+             type = "histogram") %>%
+layout(title = 'All Radience Values',
+         xaxis = list(title = 'Radience in nanowatts',
+                      zeroline = TRUE),
+         yaxis = list(title = 'Count of Pixels'))
+
+fig
+```
+Histogram shows probabilities of feature within  
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+d2 <-psych::describe(p2, IQR = TRUE)
+DT::datatable(d2)
+```
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# reset for min vals
+b1 <-sort(unique(append(b1[b1 >= min(p2)], min(p2))))
+rad1 <- rad
+rad1[rad1[] < min(p2)]<- NA
+tm_shape(rad1) +
+  tm_raster(style = "fixed", breaks =b1, title = "radiance")
+
+```
+
+## Values Greatern then 6
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#
+p2 <- p1[p1 >= 6]
+
+fig <- plot_ly(x = p2,
+             type = "histogram") %>%
+layout(title = 'All Radience Values',
+         xaxis = list(title = 'Radience in nanowatts',
+                      zeroline = TRUE),
+         yaxis = list(title = 'Count of Pixels'))
+
+fig
+```
+Histogram shows probabilities of feature within  
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+d2 <-psych::describe(p2, IQR = TRUE)
+DT::datatable(d2)
+```
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# reset for min vals
+b1 <- sort(unique(append(b1[b1 >= min(p2)], min(p2))))
+rad1 <- rad
+rad1[rad1[] < min(p2)]<- NA
+tm_shape(rad1) +
+  tm_raster(style = "fixed", breaks =b1, title = "radiance")
+
+```
+
+
+Maps of each threshold value
