@@ -1,0 +1,176 @@
+---
+title: "yearlyCountySummaries"
+author: "dan carver"
+date: "11/13/2020"
+output: html_document
+---
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+nlcdPallette <- c("#486da2", "#f10100", "#b3afa4", "#1d6533",
+                  "#b0963f", "#d0d181", "#ae722a", "#bbd7ed")
+nlcdClasses <- c("water", "developed", "barren", "forest",
+                 "scrub", "grassland", "crops", "wetlands")
+b1 <- c(0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610)
+
+```
+
+This script will be called to generate some statistical summaries and area visualizations for the various counties of interest
+
+Map showing the land cover data for the county. [data source](https://www.mrlc.gov/data/nlcd-2016-land-cover-conus)
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+vals <- unique(values(lc2))
+vals <- sort(vals[!is.na(vals)])
+nlcdPallette <- nlcdPallette[vals]
+nlcdClasses <- nlcdClasses[vals]
+m1 <- tm_shape(lc2) +
+    tm_raster(style = "cat", palette = nlcdPallette, labels = nlcdClasses, title = "Land Cover")+
+  tm_layout(legend.outside = TRUE)
+m1
+```
+<br><br>
+***
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+urban <- lc2 
+urban[urban[] != 2,] <- NA
+crops <- lc2
+crops[crops[] != 8,] <- NA
+forest <- lc2
+forest[forest[] != 4,] <- NA
+```
+
+
+# Summary of yearly median based on land cover {.tabset .tabset-fade .tabset-pills}
+
+## Urban 
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+urban[urban[]==2, ]<- 1
+uM <- urban * me1
+p1 <- values(uM)
+p1 <- p1[!is.na(p1)]
+
+b2 <- append(b1[b1 < max(p1)], max(p1))
+
+tm_shape(uM) +
+  tm_raster(style = "fixed", breaks =b2, title = "radiance")
+```
+
+Map showing the median yearly radiance for 2016 for all land cover classified as urban. Not that roads are considered urban areas. 
+<br>
+<br>
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+d2 <-psych::describe(p1, IQR = TRUE)
+DT::datatable(d2)
+```
+Table describing the summary statistics for all urban areas in 2016
+
+
+<br>
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#
+p2 <- p1
+
+fig <- plot_ly(x = p2,
+             type = "histogram") %>%
+layout(title = 'All Radience Values',
+         xaxis = list(title = 'Radience in nanowatts',
+                      zeroline = TRUE),
+         yaxis = list(title = 'Count of Pixels'))
+
+fig
+```
+Distribution of values in the urban area for 2016
+
+
+
+## Forest 
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+forest[forest[]==4, ]<- 1
+uM <- forest * me1
+p1 <- values(uM)
+p1 <- p1[!is.na(p1)]
+
+b2 <- append(b1[b1 < max(p1)], max(p1))
+
+tm_shape(uM) +
+  tm_raster(style = "fixed", breaks =b2, title = "radiance")
+```
+
+Map showing the median yearly radiance for 2016 for all land cover classified as forested.
+<br>
+<br>
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+d2 <-psych::describe(p1, IQR = TRUE)
+DT::datatable(d2)
+```
+Table describing the summary statistics for all forested areas in 2016
+
+
+<br>
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#
+p2 <- p1
+
+fig <- plot_ly(x = p2,
+             type = "histogram") %>%
+layout(title = 'All Radience Values',
+         xaxis = list(title = 'Radience in nanowatts',
+                      zeroline = TRUE),
+         yaxis = list(title = 'Count of Pixels'))
+
+fig
+```
+Distribution of values in the forsted area for 2016
+
+
+
+## Crops 
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+crops[crops[]==8, ]<- 1
+uM <- forest * me1
+p1 <- values(uM)
+p1 <- p1[!is.na(p1)]
+
+b2 <- append(b1[b1 < max(p1)], max(p1))
+
+tm_shape(uM) +
+  tm_raster(style = "fixed", breaks =b2, title = "radiance")
+```
+
+Map showing the median yearly radiance for 2016 for all land cover classified as crops
+<br>
+<br>
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+d2 <-psych::describe(p1, IQR = TRUE)
+DT::datatable(d2)
+```
+Table describing the summary statistics for all crop areas in 2016
+
+
+<br>
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#
+p2 <- p1
+
+fig <- plot_ly(x = p2,
+             type = "histogram") %>%
+layout(title = 'All Radience Values',
+         xaxis = list(title = 'Radience in nanowatts',
+                      zeroline = TRUE),
+         yaxis = list(title = 'Count of Pixels'))
+
+fig
+```
+Distribution of values in the crop area for 2016
+
+
+
+
