@@ -1,0 +1,196 @@
+---
+title: "countySummariesCounts"
+output: html_document
+author: "Dan Carver - carverd@colostate.edu"
+---
+### Assessment of `r county`
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+months <- months1
+options(scipen=999)
+tmap::tmap_mode("view")
+
+# generic for all imagery 
+seq <- seq(from = 0, to = 12, by = 2)
+df <- data.frame(matrix(nrow = 1, ncol = 2+length(seq)))
+colnames(df) <- c("month", "measure", as.character(seq)) 
+
+# classify datatypes 
+df[1, ] <- c(rep(0.01, 2+ length(seq)))
+df[1,1] <- "test"
+df[1,2] <- "test2"
+
+m2 <- 0 
+# loop over months 
+for(j in seq_along(months$name)){
+  # select rasters using character match 
+  m <- months$name[j]
+  r1 <- raster::raster(rads[grepl(pattern = m, x = rads)]) 
+  r1[r1 == 0] <- NA
+  mask <- r1 
+  mask[!is.na(mask)] <- 1
+  t3 <- length(values(r1)[!is.na(values(r1))])
+  if(j == 1){
+    totalVals <- t3
+    m2 <- j 
+  }else{
+    if(t3 > totalVals){
+      totalVals <- t3
+      m2 <- j
+    }
+  }
+  c1 <- raster::raster(counts[grepl(pattern = m, x = counts)])*mask 
+  #df to store results 
+  df1 <- data.frame(matrix(nrow = 3, ncol = 2+length(seq)))
+  colnames(df1) <- c("month","measure", as.character(seq)) 
+  df1$month <- m
+  df1$measure <- c("mean", "median", "count")
+    ## loop over all seq 
+    for(i in seq_along(seq)){
+      # generate a mask with the counts image based on the seq value 
+      c2 <- c1 
+      c2[c2 < seq[i], ] <- NA 
+      c2[!is.na(c2), ]<- 1 
+      # apply that mask to radaince value 
+      r2 <- r1 * c2 
+      # calculate Mean, median of masked radiance raster 
+      vals <- raster::values(r2)
+      vals <- vals[!is.na(vals)]
+      df1[1,i+2] <- mean(vals)
+      df1[2,i+2] <- median(vals)
+      # count total obervationa in mask. 
+      df1[3,i+2] <- length(vals) 
+      }
+      df <- dplyr::bind_rows(df, df1)
+    }
+df1 <- df[df$measure == "mean"|df$measure == "median", ]
+df2 <- df[df$measure == "count",]
+percent <- function(x){100*(x/totalVals)}
+df2[3:9] <-  apply(df2[,3:9], MARGIN=2, FUN=percent)
+df <- dplyr::bind_rows(df1, df2)
+# View(df)
+```
+
+## Map of radiance values for most complete month 
+
+Area in red shows the extent of the county. 
+The area in the blue to yellow gradient shows the unfiltered observations. 
+
+Filtering at this point was performed by the working established at the School of Mines. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+### map of the image location with the most observations 
+m <- months$name[m2]
+r1 <- raster::raster(rads[grepl(pattern = m, x = rads)]) 
+r2 <- r1 
+r2[r2==0,] <- NA
+
+tm_shape(r1)+
+  tm_raster(breaks = c(0,max(raster::values(r1),na.rm = TRUE)), showNA = FALSE,
+            palette = "-Set1", title = "extent of county")+
+tmap::tm_shape(r2)+
+  tm_raster(palette = "-YlGnBu", style = "cont", title = m)
+```
+
+## Map of number of observations for each mean radiance 
+
+Number of observations used to determine the monthly mean value at a given location
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+### map of the number of observations at a location 
+c1 <- raster::raster(counts[grepl(pattern = m, x = counts)]) *mask
+max <- max(unique(values(c1)), na.rm = TRUE)
+if(max %% 2){
+  b1 <- seq(from = 0, to = max, 2)  
+}else{
+  b1 <- seq(from = 0, to = max+1, 2)  
+}
+
+
+tmap::tm_shape(c1)+
+  tm_raster(breaks = b1, 
+            title = m)
+
+```
+
+## Relationship between number of observations and county level statistics 
+
+Plot 1 : The trend of county level mean when filtered based on the number of observations at a location 
+
+
+Plot 2 : The trend of county level median when filtered based on the number of observations at a location 
+
+
+Plot 3 : The percent of the counties total area present when filtered based on the number of observations at a location 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+### genrate the plot 
+# present a graph of the average values (mean and median) across the county with all measures and increasingly highly levels of filtering. 
+
+df2 <- df[df$measure != "test2", ]
+# create empty dataframe 
+df3 <- data.frame(matrix(nrow = 7 * length(unique(df2$month)), ncol = 5))
+colnames(df3) <- c("month","filter", "mean", "median", "counts")
+df3$month <- factor(rep(unique(df2$month), each = 7), 
+                       levels = c(unique(df2$month)))
+df3$filter <- rep(c(0,2,4,6,8,10,12), length(unique(df3$month)))
+mean <- c()
+median <- c()
+count <- c()
+for(i in seq_along(unique(df2[,1]))){
+  df2a <- df2[df2$month == unique(df3$month)[i], ]
+  mean <- c(mean, as.numeric(df2a[df2a$measure== "mean", 3:9]))
+  median <- c(median, as.numeric(df2a[df2a$measure== "median", 3:9]))
+  count <- c(count, as.numeric(df2a[df2a$measure== "count", 3:9]))
+}
+df3$mean <- mean
+df3$median <- median
+df3$counts <- count
+
+### seperate the values 
+p1 <- plot_ly(mode = "lines+markers", sort = FALSE ) %>%
+  add_trace(x=df3$filter, y=df3$mean,type = 'scatter', color = df3$month, line = list(dash = 'dash', shape= "spline"))%>%
+  layout(xaxis = list(title = "Number of Observations "),
+            yaxis = list(title = "Mean"))
+
+p2 <- plot_ly(mode = "lines+markers" ) %>%
+  add_trace(x=df3$filter, y=df3$median,type = 'scatter', color = df3$month, line = list(dash = 'solid', shape= "spline"), showlegend = FALSE) %>%
+  layout(xaxis = list(title = "Number of Observations "),
+         yaxis = list(title = "Median"))
+
+p3 <- plot_ly(mode = "lines+markers" ) %>%
+  add_trace(x=df3$filter, y=df3$counts,type = 'scatter', color = df3$month, line = list(dash = 'dashdot', shape= "spline"), showlegend = FALSE) %>%
+  layout(xaxis = list(title = "Number of Observations "),
+         yaxis = list(title = "% Observations"))
+
+p<- plotly::subplot(p1,p2,p3, nrows = 3, shareX = TRUE, titleY = TRUE)
+p 
+
+
+
+```
+
+### Example: least well represented month 
+
+Red: full extent of the county 
+
+Blue - yellow: Radience values in  the county with at least six observations.  
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+### map of the image location with the lowest observations at filter level 6 
+t1 <- df3 %>%
+  dplyr::filter(filter == 6)%>%
+  dplyr::filter(counts == min(counts))
+
+m <- as.character(t1$month)
+r1 <- raster::raster(rads[grepl(pattern = m, x = rads)]) 
+c1 <- raster::raster(counts[grepl(pattern = m, x = counts)])
+c1[c1 < 6] <- NA
+r2 <- r1 * c1 * mask
+tm_shape(r1)+
+  tm_raster(breaks = c(0,max(raster::values(r1),na.rm = TRUE)), showNA = FALSE,
+            palette = "-Set1", title = "extent of county")+
+tm_shape(r2)+
+  tm_raster(palette = "-YlGnBu", style = "cont", title = paste0(m, " 6 plus observations"))
+```
+

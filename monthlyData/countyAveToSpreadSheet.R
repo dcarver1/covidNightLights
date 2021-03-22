@@ -64,6 +64,39 @@ monthlyVals <- function(baseDir, nrows, ncols, totalValues, county){
   write.csv(x = df2, file = paste0(paste0(baseDir, "monthlySummaries/", county, ".csv")))
 }
 
+mvalsCorrected2020 <- function(baseDir, nrows, ncols, totalValues, county){
+  df <- data.frame(matrix(nrow = totalValues, ncol = 10))
+  # create empty dataframe 
+  # clause for 2012 and 2020 due to incomplete months 
+  m <- c("janurary", "feburary", "march", "april", "may", "june",
+         "july", "august", "september","october")
+  
+  n1 <- c(rep("_2020", 10))
+  n2 <- paste0(m, n1)
+  names(df) <- n2
+  df$rowNumber <- rep(1:nrows, each = ncols)
+  df$colNumber <- rep(1:ncols,nrows)
+  
+  # for each year 
+    files <- list.files(baseDir, 
+                        pattern = county, recursive = TRUE, full.names = TRUE)
+    files <- 
+    rs <- raster::stack(x = files)
+    n <- 1 
+    for(i in grep(as.character(y), names(df))){
+      df[,i] <- raster::getValues(rs[[n]])
+      n = n+1
+      }
+    }
+  }
+  df2 <- df[complete.cases(df), ]
+  write.csv(x = df2, file = paste0(paste0(baseDir, "monthlySummaries/", county, ".csv")))
+}
+
+
+
+
+
 # county of interest 
 baseDir <- "D:/nrelD/geoSpatialCentroid/covidNightLights/data/"
 

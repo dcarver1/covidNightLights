@@ -1,0 +1,158 @@
+---
+title: "downTownAZ"
+author: "dan carver"
+date: "3/5/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message=FALSE, warning=FALSE)
+library(plotly)
+library(raster)
+library(tmap)
+```
+
+
+# tucson 
+
+## Down Town Area 
+
+
+```{r}
+feb <- raster::raster("F:/geoSpatialCentroid/covidNightLights/data/correct2020imagery/feburary/Pima.tif")
+mar <- raster::raster("F:/geoSpatialCentroid/covidNightLights/data/correct2020imagery/march/Pima.tif")
+downtown <- raster::shapefile("F:/geoSpatialCentroid/covidNightLights/data/Tucson/downTownTucson.shp")
+
+febC <- raster::crop(x = feb, y = downtown[1,])%>%raster::mask(mask = downtown[1,])
+marC <- raster::crop(x = mar, y = downtown[1,])%>%
+  raster::mask(mask = downtown[1,])
+
+#county level 
+fcv <- raster::values(feb)
+fcv[fcv < 2 ] <- NA
+fcv <- fcv[!is.na(fcv)]
+
+mcv <- raster::values(mar)
+mcv[mcv < 2 ] <- NA
+mcv <- mcv[!is.na(mcv)]
+
+# town level 
+fdv <- raster::values(febC)
+fdv <- fdv[!is.na(fdv)]
+
+mdv <- raster::values(marC)
+mdv <- mdv[!is.na(mdv)]
+
+# histogram
+fig <- plot_ly(
+  type='histogram',
+  x= fdv,
+  alpha = 0.6,
+  bingroup=1,
+  name = 'Feb Values')
+
+fig <- fig %>% add_trace(
+  type='histogram',
+  x=mdv,
+  alpha = 0.6,
+  bingroup=1,
+  name = "Mar Values")
+
+fig <- fig %>% layout(
+  barmode="group",
+  bargap=0.1)
+
+fig
+
+
+```
+
+
+<br>
+<br>
+<br>
+Down town area. 11 pixels. March and February presented 
+<br>
+<br>
+<br>
+
+```{r}
+tmap_mode("view")
+m1 <- tm_shape(febC )+
+  tm_raster(title = "feb", breaks = c(seq(30,100, by = 10)))+
+  tm_shape(downtown[1,])+
+  tm_borders(col = "grey")
+m2 <- tm_shape(marC )+
+  tm_raster(title = "mar", breaks = c(seq(30,100, by = 10)))+
+  tm_shape(downtown[1,])+
+  tm_borders(col = "grey")
+
+tmap_arrange(m1, m2, sync = TRUE)
+
+
+```
+
+<br>
+<br>
+<br>
+<br>
+<br>
+
+### County level summary 
+
+<br>
+<br>
+<br>
+<br>
+
+```{r}
+# histogram
+fig <- plot_ly(
+  type='histogram',
+  x= fcv,
+  alpha = 0.6,
+  bingroup=1,
+  name = 'Feb Values')
+
+fig <- fig %>% add_trace(
+  type='histogram',
+  x=mcv,
+  alpha = 0.6,
+  bingroup=1,
+  name = "Mar Values")
+
+fig <- fig %>% layout(
+  barmode="group",
+  bargap=0.1)
+
+fig
+```
+
+<br>
+<br>
+
+Histograms of the full county. I drop all values less the 2 as they accounted for ~90 of all observations within the corrected datasets. There does seems to be more low end values in march then in Feb, but I would want to make the comparison without limiting the low values before making assumptions about this observation. 
+
+<br>
+<br>
+
+```{r}
+tmap_mode("view")
+m1 <- tm_shape(feb )+
+  tm_raster(title = "feb", breaks = c(seq(0,200, by = 20)), colorNA = NULL)+
+  tm_shape(downtown[1,])+
+  tm_borders(col = "grey")
+m2 <- tm_shape(mar )+
+  tm_raster(title = "mar", breaks = c(seq(0,200, by = 20)), colorNA = NULL)+
+  tm_shape(downtown[1,])+
+  tm_borders(col = "grey")
+tmap_arrange(m1, m2, sync = TRUE)
+
+```
+
+
+
+<br>
+<br>
+<br>
+
