@@ -2,7 +2,7 @@
 title: "downTownAZ"
 author: "dan carver"
 date: "3/5/2021"
-output: html_document
+htmlwidgets: yes
 ---
 
 ```{r setup, include=FALSE}
@@ -21,7 +21,7 @@ library(tmap)
 ```{r}
 feb <- raster::raster("F:/geoSpatialCentroid/covidNightLights/data/correct2020imagery/feburary/Pima.tif")
 mar <- raster::raster("F:/geoSpatialCentroid/covidNightLights/data/correct2020imagery/march/Pima.tif")
-downtown <- raster::shapefile("F:/geoSpatialCentroid/covidNightLights/data/Tucson/downTownTucson.shp")
+downtown <- raster::shapefile("F:/geoSpatialCentroid/covidNightLights/data/Tucson/downtownArea/downTownTucson.shp")
 
 febC <- raster::crop(x = feb, y = downtown[1,])%>%raster::mask(mask = downtown[1,])
 marC <- raster::crop(x = mar, y = downtown[1,])%>%
@@ -63,15 +63,14 @@ fig <- fig %>% layout(
   bargap=0.1)
 
 fig
-
-
+htmlwidgets::saveWidget(as_widget(fig), "index.html")
 ```
 
 
 <br>
 <br>
 <br>
-Down town area. 11 pixels. March and February presented 
+Down town area. 11 pixels. March and February presented
 <br>
 <br>
 <br>
@@ -98,7 +97,7 @@ tmap_arrange(m1, m2, sync = TRUE)
 <br>
 <br>
 
-### County level summary 
+### County level summary
 
 <br>
 <br>
@@ -131,7 +130,7 @@ fig
 <br>
 <br>
 
-Histograms of the full county. I drop all values less the 2 as they accounted for ~90 of all observations within the corrected datasets. There does seems to be more low end values in march then in Feb, but I would want to make the comparison without limiting the low values before making assumptions about this observation. 
+Histograms of the full county. I drop all values less the 2 as they accounted for ~90 of all observations within the corrected datasets. There does seems to be more low end values in march then in Feb, but I would want to make the comparison without limiting the low values before making assumptions about this observation.
 
 <br>
 <br>

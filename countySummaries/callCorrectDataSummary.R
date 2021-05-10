@@ -1,3 +1,9 @@
+###
+# render markdown summary for specific counties
+# carverd@colostate.edu 
+# 20210426 
+###
+
 #install.packages("psych")
 library(raster)
 library(dplyr)
@@ -10,7 +16,7 @@ tmap_mode("view")
 # avoid scientific notation 
 options(scipen=999)
 
-locations <- c("Austin", "Brazoria", "Chambers", "Fort Bend", "Galveston",
+locations <- c("San Diego", "Brazoria", "Chambers", "Fort Bend", "Galveston",
                "Harris", "Liberty", "Montgomery", "Waller", "Robeson")
 
 

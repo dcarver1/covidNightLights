@@ -97,7 +97,7 @@ for(i in seq_along(cOfIn)){
                    output = outLoc[i])
 }
 
-dailyData_SpecificArea <- function(input, area, dataRange, output){
+dailyData_SpecificArea <- function(input, area, dateRange, output){
   ###
   # input - csv of county level night light data
   # area - spatial feature to subset the county level data

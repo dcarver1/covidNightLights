@@ -4,10 +4,14 @@
 # carverd@colostate.edu
 ###
 
-defineLocations <- function(){
+# locations of interest 
+# c("Clark", "Pima", "Maricopa", "Pinal"
+# c("32", "04","04", "04")
+
+defineLocations <- function(counties, states){
   locations <- data.frame(
-    c("Clark", "Pima", "Maricopa", "Pinal"),
-    c("32", "04","04", "04"), stringsAsFactors = FALSE ) 
+    counties,
+    states, stringsAsFactors = FALSE ) 
   colnames(locations) <- c("name", "stateFips")
   
   months1 <- data.frame(

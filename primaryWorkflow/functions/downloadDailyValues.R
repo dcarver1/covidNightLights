@@ -11,7 +11,7 @@ library(XML)
 
 ### process for downloading all the files 
 downloadFiles <- function(path1, location){
-  # set location of the base directory 
+  # set location of the base directoy 
   url <- paste0('https://eogdata.mines.edu/wwwdata/hidden/dnb_profiles_deliver_licorr/',path1,'/csv/')
   # pull specific data from the page 
   filenames = RCurl::getURL(url, ssl.verifypeer = FALSE, verbose=TRUE,ftp.use.epsv=TRUE, dirlistonly = FALSE )

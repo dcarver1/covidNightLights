@@ -1,0 +1,30 @@
+### primary workflow
+This workflow is designed to take input monthly raster and daily data at the county
+level and generate the following products
+- monthly radiance imagery mask to county
+- monthly counts imagery mask to county
+- generate a county level summary
+- a csv that should all monthly values
+
+associateAuxData - Functions for generating reference data for individuals point locations
+includes census data and landuse/parcel data when available.
+
+dailyAverages - Stand alone script for generate rolling averages of daily datasets
+
+defineLocations - function that compile dataframe of state,fips, and month indexs
+This df get used as a reference data in the run_all.R
+
+correlationFuction - functions to generate the correlation between eco data and monthly and daily dailyAverages
+
+
+generateCountyImagery - (old verison) function to prep monthy images to the county level
+createCSV - function that converts the data in a county raster to a CSV reformat
+
+processImagesToCounty - function to prep monthly images to the county level
+
+pullBaseImagery - functions for grabbing paths for species rasters.
+
+pullUID_fromBoudingBox - grab all UID for daily data based on to lat long pairs
+this is used to subset data for a specific area.
+
+run_all - workflow to call all functions

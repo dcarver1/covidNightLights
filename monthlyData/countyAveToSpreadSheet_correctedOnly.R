@@ -11,10 +11,11 @@ f1 <- list.files(path = baseDir,pattern = ".tif", full.names = TRUE,
                  recursive = TRUE)
 
 # list of counties to iterate over 
-locations <- c("Austin", "Brazoria", "Chambers", "Fort Bend", "Galveston",
-               "Harris", "Liberty", "Montgomery", "Waller", "Robeson")
-
+locations <- c("Clark")
+# c("Austin", "Brazoria", "Chambers", "Fort Bend", "Galveston",
+# "Harris", "Liberty", "Montgomery", "Waller", "Robeson")
 # select all images from a specific county
+
 for(i in seq_along(locations)){
   f2 <- f1[grepl(pattern = locations[i], x = f1)]
   f3 <- f2[c(4,3,7,1,8,6,5,2,10,9)]
